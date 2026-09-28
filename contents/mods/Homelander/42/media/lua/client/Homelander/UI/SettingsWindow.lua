@@ -3,9 +3,15 @@ Homelander.UI = Homelander.UI or {}
 
 local SettingsWindow = ISPanel:derive("Homelander.SettingsWindow")
 
-local ROW_HEIGHT = 32
+local TITLE_FONT = UIFont.Medium
+local LABEL_FONT = UIFont.Small
+
 local TOP_MARGIN = 45
-local ROW_X = 10
+local ROW_HEIGHT = 34
+local ROW_X = 15
+local COL_GAP = 12
+local STEP_BUTTON_WIDTH = 24
+local BOTTOM_MARGIN = 15
 
 local MODE_LABEL = { min = "At Least", max = "At Most" }
 
@@ -13,14 +19,82 @@ function SettingsWindow:initialise()
     ISPanel.initialise(self)
 end
 
+-- 根据字体实际渲染宽度计算各列位置，避免按钮/文字因窗口过窄而重叠或溢出
+function SettingsWindow:computeLayout()
+    local textManager = getTextManager()
+
+    local enableWidth = math.max(
+        textManager:MeasureStringX(LABEL_FONT, "ON"),
+        textManager:MeasureStringX(LABEL_FONT, "OFF")
+    ) + 20
+
+    local labelWidth = 0
+    for _, def in ipairs(Homelander.StatLocks.Definitions) do
+        labelWidth = math.max(labelWidth, textManager:MeasureStringX(LABEL_FONT, def.label))
+    end
+
+    local modeWidth = math.max(
+        textManager:MeasureStringX(LABEL_FONT, MODE_LABEL.min),
+        textManager:MeasureStringX(LABEL_FONT, MODE_LABEL.max)
+    ) + 20
+
+    local valueWidth = textManager:MeasureStringX(LABEL_FONT, "-100.00")
+
+    local layout = {}
+    local x = ROW_X
+
+    layout.enableX = x
+    layout.enableWidth = enableWidth
+    x = x + enableWidth + COL_GAP
+
+    layout.labelX = x
+    layout.labelWidth = labelWidth
+    x = x + labelWidth + COL_GAP
+
+    layout.modeX = x
+    layout.modeWidth = modeWidth
+    x = x + modeWidth + COL_GAP
+
+    layout.minusX = x
+    x = x + STEP_BUTTON_WIDTH + 8
+
+    layout.valueX = x
+    layout.valueWidth = valueWidth
+    x = x + valueWidth + 8
+
+    layout.plusX = x
+    x = x + STEP_BUTTON_WIDTH
+
+    layout.totalWidth = x + ROW_X
+    return layout
+end
+
 function SettingsWindow:createChildren()
     ISPanel.createChildren(self)
 
+    local layout = self:computeLayout()
+    self.layout = layout
+
+    local rowCount = #Homelander.StatLocks.Definitions
     local buttonWidth = 80
     local buttonHeight = 25
+
+    local titleWidth = getTextManager():MeasureStringX(TITLE_FONT, Homelander.Config.MOD_NAME .. " Stat Lock Settings")
+    local desiredWidth = math.max(layout.totalWidth, titleWidth + ROW_X * 2, buttonWidth + ROW_X * 2)
+    local desiredHeight = TOP_MARGIN + rowCount * ROW_HEIGHT + BOTTOM_MARGIN + buttonHeight + BOTTOM_MARGIN
+
+    if desiredWidth ~= self.width or desiredHeight ~= self.height then
+        local centerX = self:getX() + self.width / 2
+        local centerY = self:getY() + self.height / 2
+        self:setWidth(desiredWidth)
+        self:setHeight(desiredHeight)
+        self:setX(centerX - desiredWidth / 2)
+        self:setY(centerY - desiredHeight / 2)
+    end
+
     self.closeButton = ISButton:new(
-        self.width - buttonWidth - 10,
-        self.height - buttonHeight - 10,
+        self.width - buttonWidth - ROW_X,
+        self.height - buttonHeight - BOTTOM_MARGIN,
         buttonWidth,
         buttonHeight,
         "Close",
@@ -35,23 +109,23 @@ function SettingsWindow:createChildren()
         local y = TOP_MARGIN + (index - 1) * ROW_HEIGHT
         local row = {}
 
-        row.enableButton = ISButton:new(ROW_X, y, 70, 24, "", self, SettingsWindow.onClickEnable)
+        row.enableButton = ISButton:new(layout.enableX, y, layout.enableWidth, 24, "", self, SettingsWindow.onClickEnable)
         row.enableButton.def = def
         row.enableButton:initialise()
         self:addChild(row.enableButton)
 
-        row.modeButton = ISButton:new(ROW_X + 170, y, 70, 24, "", self, SettingsWindow.onClickMode)
+        row.modeButton = ISButton:new(layout.modeX, y, layout.modeWidth, 24, "", self, SettingsWindow.onClickMode)
         row.modeButton.def = def
         row.modeButton:initialise()
         self:addChild(row.modeButton)
 
-        row.minusButton = ISButton:new(ROW_X + 250, y, 24, 24, "-", self, SettingsWindow.onClickStep)
+        row.minusButton = ISButton:new(layout.minusX, y, STEP_BUTTON_WIDTH, 24, "-", self, SettingsWindow.onClickStep)
         row.minusButton.def = def
         row.minusButton.delta = -def.step
         row.minusButton:initialise()
         self:addChild(row.minusButton)
 
-        row.plusButton = ISButton:new(ROW_X + 310, y, 24, 24, "+", self, SettingsWindow.onClickStep)
+        row.plusButton = ISButton:new(layout.plusX, y, STEP_BUTTON_WIDTH, 24, "+", self, SettingsWindow.onClickStep)
         row.plusButton.def = def
         row.plusButton.delta = def.step
         row.plusButton:initialise()
@@ -108,13 +182,14 @@ end
 
 function SettingsWindow:render()
     ISPanel.render(self)
-    self:drawText(Homelander.Config.MOD_NAME .. " Stat Lock Settings", 10, 10, 1, 1, 1, 1, UIFont.Medium)
+    self:drawText(Homelander.Config.MOD_NAME .. " Stat Lock Settings", ROW_X, 10, 1, 1, 1, 1, TITLE_FONT)
 
+    local layout = self.layout
     for index, def in ipairs(Homelander.StatLocks.Definitions) do
         local y = TOP_MARGIN + (index - 1) * ROW_HEIGHT
         local setting = Homelander.StatLocks.Settings[def.key]
-        self:drawText(def.label, ROW_X + 90, y + 4, 0.9, 0.9, 0.9, 1, UIFont.Small)
-        self:drawText(tostring(setting.value), ROW_X + 278, y + 4, 0.9, 0.9, 0.9, 1, UIFont.Small)
+        self:drawText(def.label, layout.labelX, y + 4, 0.9, 0.9, 0.9, 1, LABEL_FONT)
+        self:drawText(string.format("%.2f", setting.value), layout.valueX, y + 4, 0.9, 0.9, 0.9, 1, LABEL_FONT)
     end
 end
 

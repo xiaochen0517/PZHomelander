@@ -10,14 +10,14 @@ local StatLocks = Homelander.StatLocks
 StatLocks.Definitions = {
     {
         key = "health", label = "Health",
-        min = 0, max = 1, step = 0.05,
+        min = 0, max = 1, step = 0.1,
         defaultMode = "min", defaultValue = 0.3,
         get = function(player) return player:getHealth() end,
         set = function(player, value) player:setHealth(value) end,
     },
     {
         key = "overallBodyHealth", label = "Overall Health",
-        min = 0, max = 100, step = 5,
+        min = 0, max = 100, step = 10,
         defaultMode = "min", defaultValue = 30,
         get = function(player) return player:getBodyDamage():getOverallBodyHealth() end,
         set = function(player, value)
@@ -34,21 +34,21 @@ StatLocks.Definitions = {
     },
     {
         key = "hunger", label = "Hunger",
-        min = 0, max = 1, step = 0.05,
+        min = 0, max = 1, step = 0.1,
         defaultMode = "max", defaultValue = 0.8,
         get = function(player) return player:getStats():get(CharacterStat.HUNGER) end,
         set = function(player, value) player:getStats():set(CharacterStat.HUNGER, value) end,
     },
     {
         key = "thirst", label = "Thirst",
-        min = 0, max = 1, step = 0.05,
+        min = 0, max = 1, step = 0.1,
         defaultMode = "max", defaultValue = 0.8,
         get = function(player) return player:getStats():get(CharacterStat.THIRST) end,
         set = function(player, value) player:getStats():set(CharacterStat.THIRST, value) end,
     },
     {
         key = "fatigue", label = "Fatigue",
-        min = 0, max = 1, step = 0.05,
+        min = 0, max = 1, step = 0.1,
         defaultMode = "max", defaultValue = 0.8,
         get = function(player) return player:getStats():get(CharacterStat.FATIGUE) end,
         set = function(player, value) player:getStats():set(CharacterStat.FATIGUE, value) end,

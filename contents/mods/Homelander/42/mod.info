@@ -1,0 +1,4 @@
+name=Homelander
+id=Homelander
+description=为血量/饥饿/口渴等状态设置数值锁定（不低于/不高于指定值），受伤或状态变化时自动纠正。
+poster=poster.png

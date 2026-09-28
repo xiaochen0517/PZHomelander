@@ -1,8 +1,8 @@
 -- B42 左侧边栏按钮：hook ISEquippedItem.initialise，在原生侧栏按钮（搬运/健康/搜寻等）末尾追加本 Mod 图标按钮
--- 点击切换 ExampleWindow；窗口开启时按钮切换为 On 图标（原生 Sidebar 纹理）
+-- 点击切换 SettingsWindow；窗口开启时按钮切换为 On 图标（原生 Sidebar 纹理）
 
-PZExampleMod = PZExampleMod or {}
-PZExampleMod.UI = PZExampleMod.UI or {}
+Homelander = Homelander or {}
+Homelander.UI = Homelander.UI or {}
 
 local ICON_NAME = "Client_Icon" -- 复用原版 media/ui/Sidebar/<size>/Client_Icon_On/Off_<size>.png
 
@@ -11,11 +11,11 @@ local function getIcon(size, suffix)
 end
 
 local function onSidebarClick(target, button, x, y)
-    PZExampleMod.UI.ExampleWindow.toggle()
+    Homelander.UI.SettingsWindow.toggle()
 end
 
 local function appendSidebarButton(equipped)
-    if equipped.PZExampleModBtn then return end
+    if equipped.HomelanderBtn then return end
     -- 原生仅在 player 0（键鼠）时创建侧栏按钮，无 invBtn 说明是非键鼠玩家，跳过
     if not equipped.invBtn then return end
 
@@ -40,8 +40,8 @@ local function appendSidebarButton(equipped)
     btn:ignoreWidthChange()
     btn:ignoreHeightChange()
     equipped:addChild(btn)
-    equipped:addMouseOverToolTipItem(btn, PZExampleMod.Config.MOD_NAME)
-    equipped.PZExampleModBtn = btn
+    equipped:addMouseOverToolTipItem(btn, Homelander.Config.MOD_NAME)
+    equipped.HomelanderBtn = btn
 
     -- 重算容器宽高，把新按钮纳入布局
     equipped:shrinkWrap()
@@ -57,8 +57,8 @@ end
 local originalPrerender = ISEquippedItem.prerender
 ISEquippedItem.prerender = function(self)
     originalPrerender(self)
-    local btn = self.PZExampleModBtn
+    local btn = self.HomelanderBtn
     if not btn then return end
-    local window = PZExampleMod.UI.ExampleWindow
+    local window = Homelander.UI.SettingsWindow
     btn:setImage(getIcon(btn.width, window.instance and "On" or "Off"))
 end

@@ -1,0 +1,4 @@
+id=0
+name=PZ Example Mod
+description=Example Lua mod framework for Project Zomboid Build 42.
+tags=Build 42

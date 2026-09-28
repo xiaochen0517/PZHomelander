@@ -1,0 +1,16 @@
+module PZExampleMod
+{
+    imports
+    {
+        Base
+    }
+
+    item ExampleItem
+    {
+        ItemType = base:normal,
+        DisplayName = Example Item,
+        Icon = Bandage,
+        Weight = 0.1,
+        Description = An example item added by PZ Example Mod.,
+    }
+}
